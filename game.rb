@@ -15,38 +15,46 @@ class Game
   def generate_question
     num1 = rand(1..20)
     num2 = rand(1..20)
-    puts "#{@current_player.name}: What does #{num1} plus #{num2} equal?"
     @answer = num1 + num2
+    puts "#{@current_player.name}: What does #{num1} plus #{num2} equal?"
   end
 
-  def check_answer(player_answer, real_answer)
-    player_answer.to_i === real_answer
+  def answer_correct?
+    @player_answer.to_i === @answer
+  end
+
+  def determine_result
+    if answer_correct?
+      puts "#{@current_player.name}: YES! You are correct!"
+      puts "P1: #{@player1.lives}/3 vs P2: #{@player2.lives}/3"
+    else
+      @current_player.decrease_life
+      puts "#{@current_player.name}: Seriously? No!"
+      puts "P1: #{@player1.lives}/3 vs P2: #{@player2.lives}/3"
+    end
+  end
+
+  def determine_outcome
+    if @current_player.lives === 0
+      winner = determine_current_player(!@flag)
+      puts "#{winner.name} wins with a score of #{winner.lives}/3"
+      puts '----------------- GAME OVER -------------------'
+      puts 'Good bye!'
+    else
+      @flag = !@flag
+      @current_player = determine_current_player(@flag)
+      puts '---------------- NEW TURN -------------------'
+    end
   end
 
   def execute
-    flag = true
-    @current_player = determine_current_player(flag)
+    @flag = true
+    @current_player = determine_current_player(@flag)
     while @current_player.lives > 0
       generate_question
-      player_answer = gets.chomp
-      if check_answer(player_answer, @answer) === true
-        puts "#{@current_player.name}: YES! You are correct!"
-        puts "P1: #{@player1.lives}/3 vs P2: #{@player2.lives}/3"
-      else
-        @current_player.decrease_life
-        puts "#{@current_player.name}: Seriously? No!"
-        puts "P1: #{@player1.lives}/3 vs P2: #{@player2.lives}/3"
-      end
-      if @current_player.lives === 0
-        winner = determine_current_player(!flag)
-        puts "#{winner.name} wins with a score of #{winner.lives}/3"
-        puts '----------------- GAME OVER -------------------'
-        puts 'Good bye!'
-      else
-        flag = !flag
-        @current_player = determine_current_player(flag)
-        puts '---------------- NEW TURN -------------------'
-      end
+      @player_answer = gets.chomp
+      determine_result
+      determine_outcome
     end
   end
 
